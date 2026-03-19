@@ -1,0 +1,41 @@
+package demo;
+
+message AddRequest {
+  int32 lhs = 1;
+  int32 rhs = 2;
+}
+
+message AddResponse {
+  int32 result = 1;
+}
+
+message FibRequest {
+  uint32 n = 1;
+}
+
+message FibResponse {
+  uint64 value = 1;
+}
+
+message EchoRequest {
+  string payload = 1;
+}
+
+message EchoResponse {
+  string payload = 1;
+}
+
+message DelayRequest {
+  uint32 sleep_ms = 1;
+}
+
+message DelayResponse {
+  string state = 1;
+}
+
+service CalculatorService {
+  rpc Add(AddRequest) returns (AddResponse);
+  rpc Fib(FibRequest) returns (FibResponse);
+  rpc Echo(EchoRequest) returns (EchoResponse);
+  rpc Delay(DelayRequest) returns (DelayResponse);
+}
