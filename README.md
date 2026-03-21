@@ -79,6 +79,7 @@ service CalculatorService {
 - 架构说明：`docs/architecture.md`
 - API 与协议说明：`docs/api.md`
 - 技术栈：`docs/tech-stack.md`
+- 学习与面试深度解析：`docs/learning/minirpc-deep-dive.md`
 - 实现重难点：`docs/challenges.md`
 - 性能报告：`docs/perf-report.md`
 - 常见面试题：`docs/interview-questions.md`
