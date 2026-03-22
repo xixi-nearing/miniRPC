@@ -167,6 +167,8 @@ void RpcServer::AcceptLoop() {
     int no_delay = 1;
     ::setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &no_delay, sizeof(no_delay));
 
+    // 连接读写线程与业务线程池分离：
+    // 前者负责协议收发，后者负责真正执行 RPC 方法，避免业务阻塞 accept。
     std::thread([this, client_fd, peer_ip]() {
       HandleClient(client_fd, peer_ip);
     }).detach();
@@ -201,6 +203,7 @@ void RpcServer::HandleClient(int client_fd, std::string peer_ip) {
     } else {
       auto promise = std::make_shared<std::promise<ResponseFrame>>();
       auto future = promise->get_future();
+      // 连接线程只负责把请求投递到线程池，并同步等待结果，保证单连接上的响应顺序稳定。
       const auto scheduled =
           executor_.Submit([this, request, promise]() mutable { promise->set_value(Dispatch(request)); });
       if (!scheduled) {
@@ -230,6 +233,7 @@ void RpcServer::HandleClient(int client_fd, std::string peer_ip) {
 
 ResponseFrame RpcServer::Dispatch(const RequestFrame& request) const {
   ResponseFrame response;
+  // 框架级校验统一放在这里，业务 handler 只关心 payload 处理。
   if (!options_.auth_token.empty() && request.auth_token != options_.auth_token) {
     response.status = StatusCode::kAuthFailed;
     response.message = "auth token mismatch";

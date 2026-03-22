@@ -4,6 +4,7 @@ namespace mrpc {
 
 ThreadPool::ThreadPool(std::size_t thread_count, std::size_t max_queue_size)
     : max_queue_size_(max_queue_size == 0 ? 1 : max_queue_size) {
+  // 保证线程池至少有一个工作线程，避免配置为 0 时完全失去执行能力。
   const auto workers = thread_count == 0 ? 1 : thread_count;
   workers_.reserve(workers);
   for (std::size_t i = 0; i < workers; ++i) {
@@ -48,6 +49,7 @@ void ThreadPool::WorkerLoop() {
     {
       std::unique_lock<std::mutex> lock(mutex_);
       cv_.wait(lock, [this]() { return stopping_ || !queue_.empty(); });
+      // Stop 之后继续把队列清空，确保已接收的 RPC 不会半途丢失。
       if (stopping_ && queue_.empty()) {
         return;
       }

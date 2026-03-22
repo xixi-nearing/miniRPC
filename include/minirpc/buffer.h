@@ -49,6 +49,7 @@ class BufferWriter {
     static_assert(std::is_integral_v<T> || std::is_same_v<T, bool>);
     using U = detail::UnsignedEquivalent<T>;
     U raw = detail::ToUnsigned(value);
+    // 协议层统一使用大端序，便于跨语言/跨机器保持稳定的线格式。
     for (int shift = static_cast<int>(sizeof(U) - 1) * 8; shift >= 0; shift -= 8) {
       buffer_.push_back(static_cast<char>((raw >> shift) & 0xFFU));
     }
@@ -80,6 +81,7 @@ class BufferReader {
       return false;
     }
     U raw = 0;
+    // 与 WriteIntegral 对应，按大端序逐字节恢复整数。
     for (std::size_t i = 0; i < sizeof(U); ++i) {
       raw = static_cast<U>((raw << 8) | static_cast<unsigned char>(data_[offset_ + i]));
     }

@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
     options.ip_allowlist.insert(peer);
   }
 
+  // 生成代码把强类型服务实现注册成运行时可识别的 service + method 处理器。
   mrpc::RpcServer server(options);
   demo::DemoCalculatorService service;
   status = demo::RegisterCalculatorService(&server, &service);
@@ -44,6 +45,7 @@ int main(int argc, char** argv) {
 
   std::cout << "MiniRPC server is listening on " << options.host << ':'
             << server.bound_port() << '\n';
+  // 示例程序保持前台阻塞，便于直接观察端到端调用。
   server.Wait();
   return 0;
 }

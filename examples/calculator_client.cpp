@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  // 客户端 Stub 内部会把强类型请求对象序列化，然后经 RpcChannel 发到服务端。
   mrpc::RpcChannel channel(*endpoint, registry.auth_token());
   demo::CalculatorServiceClient client(&channel);
 

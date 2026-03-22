@@ -25,6 +25,8 @@ struct ServerOptions {
 
 class RpcServer {
  public:
+  // handler 接收序列化后的业务请求，输出序列化后的业务响应。
+  // 这样运行时不依赖具体 IDL 类型，生成代码负责在两端做对象与字节串的转换。
   using MethodHandler = std::function<RpcStatus(const std::string&, std::string*)>;
 
   explicit RpcServer(ServerOptions options);
@@ -43,8 +45,10 @@ class RpcServer {
  private:
   using MethodMap = std::unordered_map<std::string, MethodHandler>;
 
+  // AcceptLoop 只负责接入连接；每个连接的收发循环在独立线程中运行。
   void AcceptLoop();
   void HandleClient(int client_fd, std::string peer_ip);
+  // Dispatch 是“协议层 -> 业务层”的边界，完成鉴权、deadline 校验和方法路由。
   ResponseFrame Dispatch(const RequestFrame& request) const;
   bool IsAllowedPeer(const std::string& peer_ip) const;
 
